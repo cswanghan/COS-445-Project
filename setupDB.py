@@ -23,13 +23,12 @@ class SearchSession(object):
 	self.desc_id = desc_id
 	self.user_id = user_id
 
-    """
     def __repr__(self):
-	return "SearchSession<('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')>" %
-			(str(self.clicks), str(self.impressions), self.display_URL, self.ad_id, self.advertiser_id,
-			 str(self.depth), str(self.position), self.query_id, self.keyword_id, self.title_id, self.desc_id, 
-			 self.user_id)
-    """
+	return "<SearchSession('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')>" % (
+			       str(self.clicks), str(self.impressions), self.display_URL, self.ad_id, self.advertiser_id,
+			       str(self.depth), str(self.position), self.query_id, self.keyword_id, self.title_id, self.desc_id, 
+			       self.user_id
+			       )
 
 
 if __name__ == '__main__':
@@ -53,10 +52,11 @@ if __name__ == '__main__':
 	   Column('desc_id', String(40)),
 	   Column('user_id', String(40)))
 
+    # drop existing tables
+    metadata.drop_all(engine)
+
     # create table
     metadata.create_all(engine) 
-
-    # insert instances from training set
 
     # creat mapping 
     mapper(SearchSession, sessions_table)
@@ -67,14 +67,16 @@ if __name__ == '__main__':
 
     sessions_table.delete()
 
+    # read each instance from training set and 
+    # add to database as row
     f = open('training1000.txt', 'r')
-
     l = []
     id = 1
-for line in f.readlines():
-    print "HELLO", id
-    fields = line.split()
-    l.append(SearchSession(str(id), int(fields[0]),
+
+    for line in f.readlines():
+	print "HELLO", id
+	fields = line.split()
+	l.append(SearchSession(str(id), int(fields[0]),
 	             int(fields[1]),
 		     fields[2],
 		     fields[3],
@@ -87,22 +89,7 @@ for line in f.readlines():
 		     fields[10],
 		     fields[11]))
 
-    id += 1
+	id += 1
     
-    """
-    dict = {'clicks', int(fields[0]),
-	    'impressions', int(fields[1]),
-	    'display_URL', fields[2],
-	    'ad_id', fields[3],
-	    'advertiser_id', fields[4],
-	    'depth', int(fields[5]),
-	    'position', int(fields[6]),
-	    'query_id', fields[7],
-	    'keyword_id', fields[8],
-	    'title_id', fields[9],
-	    'desc_id', fields[10],
-	    'user_id', fields[11]}
-    """
-
     session.add_all(l)
     session.commit()

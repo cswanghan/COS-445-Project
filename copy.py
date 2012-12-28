@@ -5,7 +5,7 @@ Since training set is too large, copy N
 lines of it to new training set
 """
 
-N = 1000
+N = 100000
 originalFile = 'training.txt'
 newFile = "training" + str(N) + ".txt"
 

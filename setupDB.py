@@ -8,7 +8,7 @@ from SearchSession import *
 
 if __name__ == '__main__':
     # setup DB connection 
-    engine = create_engine('sqlite:///ctr.db', echo=True)
+    engine = create_engine('sqlite:///ctr.db', echo=False)
     metadata = MetaData()
 
     # define search session table
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     id = 1
 
     for line in f.readlines():
-	print "HELLO", id
+	#print "HELLO", id
 	fields = line.split()
 	l.append(SearchSession(str(id), int(fields[0]),
 	             int(fields[1]),

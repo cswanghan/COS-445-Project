@@ -7,13 +7,17 @@ class BipartiteGraph(object):
     def __init__(self):
 	# Maintains which advertiser is connected to which keyword
 	self.matrix = {}
-	self.list_of_keywords = set()
+	#self.list_of_keywords = set()
+	self.dict_of_keywords = {}
 
     """
     Returns the number of total advertisers that 
     bid for this specific ad
     """
     def numberOfAdvertisersForKeyword(self, kw):
+	return len(self.dict_of_keywords[kw])
+	
+	"""
 	kw = self.getKeyword(kw)
 	count = 0
 
@@ -26,12 +30,20 @@ class BipartiteGraph(object):
 		    count += 1	
 
 	return count
+	"""
 
     """
     Returns the number of total advertisers that 
     bid for both specific ads
     """
     def numberOfAdvertisersForTwoKeywords(self, kw1, kw2):
+	interSet = set(self.dict_of_keywords[kw1]).intersection( set(self.dict_of_keywords[kw2] ))
+	if interSet == None:
+	    return 0
+	else:
+	    return len(interSet)
+
+	"""
 	kw1 = self.getKeyword(kw1)
 	kw2 = self.getKeyword(kw2)
 	count = 0
@@ -45,6 +57,7 @@ class BipartiteGraph(object):
 		    count += 1	
 
 	return count
+	"""
 
 	
     """
@@ -64,7 +77,7 @@ class BipartiteGraph(object):
     """
     def getKeyword(self, kw):
 	existingKw = None
-	for k in self.list_of_keywords:
+	for k in self.dict_of_keywords.keys():
 	    if k == kw:
 		existingKw = k
 		break
@@ -82,7 +95,8 @@ class BipartiteGraph(object):
 	    # specific adv to ad and no edge from all other advs to this ad
 	    actualKw = self.getKeyword(kw)
 	    if actualKw == None:
-		self.list_of_keywords.add(kw)
+		self.dict_of_keywords[kw] = [advertiser]
+		#self.list_of_keywords.add(kw)
 		for adv in self.matrix.keys():
 		    self.matrix[adv][kw] = 0
 
@@ -91,7 +105,8 @@ class BipartiteGraph(object):
 	    # Since we have seen this ad before, just record that there
 	    # exists edge from specific adv to ad    
 	    else:
-		self.matrix[advertiser][actualKw] = 1			
+		self.matrix[advertiser][actualKw] = 1
+		self.dict_of_keywords[actualKw].append(advertiser)			
 
 	# The adv is not in the matrix
 	else:
@@ -102,18 +117,20 @@ class BipartiteGraph(object):
 		for adv in self.matrix.keys():
 		    self.matrix[adv][kw] = 0
 		
-		self.list_of_keywords.add(kw)
+		#self.list_of_keywords.add(kw)
+		self.dict_of_keywords[kw] = [advertiser]
 
 	    # Add adv to matrix - add no edge from this adv to existing ads
 	    # and record edge from this adv to given ad
 	    self.matrix[advertiser] = {}
-	    for old_kw in self.list_of_keywords:
+	    for old_kw in self.dict_of_keywords.keys():
 		self.matrix[advertiser][old_kw] = 0
 
 	    if actualKw == None:
 		self.matrix[advertiser][kw] = 1
 	    else:
 		self.matrix[advertiser][actualKw] = 1
+		self.dict_of_keywords[actualKw].append(advertiser)
 
     def getKeywords(self, advertiser):
 	string = repr(advertiser) + " => "

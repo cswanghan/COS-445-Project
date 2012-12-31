@@ -7,7 +7,7 @@ Base = declarative_base()
 class TestSession(Base):
     __tablename__ = 'test_sessions'
 
-    primary_id = Column(String, primary_key=True)
+    primary_id = Column(Integer, primary_key=True)
     display_URL = Column(String(40))
     ad_id = Column(String(40))
     advertiser_id = Column(String(40))

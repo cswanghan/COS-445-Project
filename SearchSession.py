@@ -7,7 +7,7 @@ Base = declarative_base()
 class SearchSession(Base):
     __tablename__ = 'search_sessions'
 
-    primary_id = Column(String, primary_key=True)
+    primary_id = Column(Integer, primary_key=True)
     clicks = Column(Integer)
     impressions = Column(Integer)
     display_URL = Column(String(40))

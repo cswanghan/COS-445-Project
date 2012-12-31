@@ -5,12 +5,16 @@ from sqlalchemy.orm import mapper
 from sqlalchemy.orm import sessionmaker
 
 from SearchSession import *
-#from Ad import *
+from TestSession import *
 from Keyword import *
 from Advertiser import *
 from BipartiteGraph import *
 
 
+"""
+Creates bipartite graph out of training set and test set (read from database)
+Returns the bipartite graph & list of session from test set
+"""
 def createGraph():
     # setup DB connection 
     engine = create_engine('sqlite:///ctr.db', echo=True)
@@ -20,24 +24,26 @@ def createGraph():
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # make query to get all rows from search_sessions table
+    # create empty bipartite graph
     g = BipartiteGraph()
-    firstAdv = None
-    count = 0
 
+    # make query to get all rows from search_sessions table
     for searchSession in session.query(SearchSession).all():
-	#ad = Ad(searchSession.ad_id, searchSession.keyword_id, searchSession.desc_id)
-	keyword = Keyword(searchSession.keyword_id)
+    	keyword = Keyword(searchSession.keyword_id)
 	advertiser = Advertiser(searchSession.advertiser_id)
 	g.add(advertiser, keyword)
-
-	if count == 0:
-	    firstAdv = advertiser
     
-	count += 1
 
-    print repr(g)
-    return g
+    # make query to get all rows from test_sessions table (order by primary_id to 
+    # maintain order in test set)
+    list_of_test_sessions = session.query(TestSession).order_by(TestSession.primary_id)
+    for testSession in list_of_test_sessions:
+    	keyword = Keyword(testSession.keyword_id)
+	advertiser = Advertiser(testSession.advertiser_id)
+	g.add(advertiser, keyword)
+	
+    #print repr(g)
+    return (g, list_of_test_sessions)
 
 # Test Main
 if __name__ == '__main__':

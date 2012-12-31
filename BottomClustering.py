@@ -1,5 +1,6 @@
 from BipartiteGraph import *
 from createGraph import createGraph
+from MeanSquaredError import evaluator
 
 class Node:
     def __init__(self, kw):
@@ -47,10 +48,33 @@ class Cluster:
 
     def __eq__(self, other):
 	return (self.node_list == other.node_list)
+
+    """
+    Return average CTR of cluster
+    """
+    def computeCTR(self):
+	total = 0.0
+	for node in self.node_list:
+	    # If keyword is in training set, and 
+	    # CTR value is returned then factor that
+	    # into average
+	    avg = node.kw.averageCTR()
+	    if avg != None:
+		total += avg
+	
+	return total/len(self.node_list)
+
     
 class Graph(object):
     def __init__(self):
 	self.node_list = []
+
+    def findNode(self, kw):
+	for node in self.node_list:
+	    if node.kw == kw:
+		return node
+	    
+	return None
 
     """
     Defines a similarity score for two ads - is 
@@ -115,7 +139,7 @@ class Graph(object):
 	
 if __name__ == '__main__':
     # Create biparitite graph from existing Advertisement and Ads 
-    g = createGraph()
+    (g, list_of_test_sessions) = createGraph()
 			
     # Convert bipartite graph to directed graph using similarity function
     # of ads
@@ -193,4 +217,17 @@ if __name__ == '__main__':
     #for cluster in cluster_list:
 	#print repr(cluster)
 
-    print len(cluster_list)
+    #print len(cluster_list)
+
+    # Compute predictions for keywords in test set 
+    list_test_keywords = map(lambda x : Keyword(x.keyword_id), list_of_test_sessions)
+    list_CTR_predictions = []
+    for kw in list_test_keywords:
+	print kw	
+	corresponding_cluster = node_cluster_dict[g_new.findNode(kw)]
+	list_CTR_predictions.append(corresponding_cluster.computeCTR())
+
+    # Compute Mean Squared Error for predictions
+    m_s_e = evaluator(list_CTR_predictions)
+    print m_s_e
+	

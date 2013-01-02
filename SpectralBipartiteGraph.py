@@ -14,8 +14,7 @@ class SpectralBipartiteGraph(BipartiteGraph):
     Constructor uses parent constructor
     """
     def __init__(self):
-	#print "spectral initiating"
-	super(SpectralBipartiteGraph, self).__init__()
+    	super(SpectralBipartiteGraph, self).__init__()
 	self.weightMatrix = None
 	
     
@@ -41,7 +40,6 @@ class SpectralBipartiteGraph(BipartiteGraph):
 
 	
 	self.weightMatrix = np.array(list_of_rows)
-	#print "weight Matrix", self.weightMatrix
 
     """
     Compute scaled weight matrix W^
@@ -49,19 +47,14 @@ class SpectralBipartiteGraph(BipartiteGraph):
     def getWeightPrimeMatrix(self):
 	# compute D_x^(-1/2)    
 	D_x = getDiagonalMatrix(self.weightMatrix)
-	#D_x_powered = np.linalg.matrix_power(D_x, 0.5)
-	#D_x_powered = np.power(D_x, -0.5)
 	D_x_powered = powDiagonalMatrix(D_x, -0.5)	
 
 	# compute D_y^(-1/2)
 	D_y = getDiagonalMatrix(np.transpose(self.weightMatrix))
-	#D_y_powered = np.linalg.matrix_power(D_y, 0.5)
-	#D_y_powered = np.power(D_y, -0.5)
 	D_y_powered = powDiagonalMatrix(D_y, -0.5)	
 
 	# multiply matrices
 	w_prime = np.dot(np.dot(D_x_powered, self.weightMatrix), D_y_powered)
-	#print "weight Matrix Prime", w_prime
     
 	return w_prime
 
@@ -71,18 +64,9 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	    
 	# assume eigenvalues/eigenvectors orderered in dec order left to right
 	# 2nd-largest left singular vector (derived from U)
-	
-	#print "S"
-	#print S
-	#print "U"
-	#print U
 	x = U[:,1]
-	#print "x"
-	#print x
-	
+    	
 	# 2nd-largest right singular vector (derived from V)
-	#print "V"
-	#print V
 	y = V[:,1]
 
 	return (x,y)
@@ -96,16 +80,11 @@ class SpectralBipartiteGraph(BipartiteGraph):
 
 	# compute D_x^(-1/2)    
 	D_x = getDiagonalMatrix(self.weightMatrix)
-	#D_x_powered = np.linalg.matrix_power(D_x, 0.5)
-	#D_x_powered = np.power(D_x, -0.5)
-	D_x_powered = powDiagonalMatrix(D_x, -0.5)	
+    	D_x_powered = powDiagonalMatrix(D_x, -0.5)	
 	
 	# compute D_y^(-1/2)
 	D_y = getDiagonalMatrix(np.transpose(self.weightMatrix))
-	#D_y_powered = np.linalg.matrix_power(D_y, 0.5)
-	#D_y_powered = np.power(D_y, -0.5)
 	D_y_powered = powDiagonalMatrix(D_y, -0.5)	
-
 
 	x_new = np.dot(D_x_powered, x)
 	y_new = np.dot(D_y_powered, y)
@@ -118,10 +97,6 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	# Partition advertisements
 	index = 0
 	c_x = 0.0
-	#print "y"
-	#print y
-	#print "y_new"
-	#print y_new
 	for adv in sorted(self.matrix.keys(), key = lambda adv : adv.advertiser_id):
 	    if x_new.item(index) >= c_x:
 		A.append(adv)
@@ -143,14 +118,8 @@ class SpectralBipartiteGraph(BipartiteGraph):
 
 	# Build new partitioned bipartite graphs
 	# where G = (A,B) and G_c = (A_c,B_c)
-
 	partition = SpectralBipartiteGraph()
 	partition_c = SpectralBipartiteGraph()
-
-	#print "A", len(A)
-	#print "Ac", len(A_c)
-	#print "B", len(B)
-	#print "Bc", len(B_c)
 
 	for adv in A:
 	    for ad in B:

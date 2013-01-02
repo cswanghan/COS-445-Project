@@ -31,9 +31,10 @@ def getDiagonalMatrix(M):
     return np.array(list_of_rows)
 
 """
-Power diagonal values to given power
+Power diagonal values to given power - 
+done by just powering values in the diagonal
+spot in the matrix
 """
-
 def powDiagonalMatrix(M, power):
     list_of_rows = []
     for i in range(0, M.shape[0]):

@@ -7,7 +7,6 @@ class BipartiteGraph(object):
     def __init__(self):
 	# Maintains which advertiser is connected to which keyword
 	self.matrix = {}
-	#self.list_of_keywords = set()
 	self.dict_of_keywords = {}
 
     """

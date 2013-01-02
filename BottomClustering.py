@@ -83,19 +83,15 @@ class Graph(object):
     def similarityScore(self, kw1, kw2, g):
 	# total number of advertisers in the market
 	total_advs = len(g.matrix.keys())
-	#print "total", total_advs
-
+    
 	# total number of advertisers that bid for ad1 and ad2
-	#print repr(kw1)
-	#print repr(kw2)
 	num_kw1 = g.numberOfAdvertisersForKeyword(kw1)
 	num_kw2 = g.numberOfAdvertisersForKeyword(kw2)
-	#print "ad1", num_kw1
-	#print "ad2", num_kw2 
-
+	
+	# total number of advertisers that bid for both
 	num_both = g.numberOfAdvertisersForTwoKeywords(kw1, kw2)
-	#print "num_both", num_both
-
+	    
+	# return similarity score
 	return (total_advs * num_both - num_kw1 * num_kw2) / math.sqrt(num_kw1 * num_kw2 * (total_advs - num_kw1) * (total_advs - num_kw2))
 
     """
@@ -104,14 +100,10 @@ class Graph(object):
     similarity function of Ads
     """
     def bipartiteConversion(self, g):
-	print "Creating Nodes for ads"
-
 	# Create empty Nodes corresponding to ads 
 	for kw in g.dict_of_keywords.keys():
 	    node = Node(kw)
 	    self.node_list.append(node)
-
-	print "Creating edges between Nodes"
 	
 	# For each node, connect to every other node with 
 	# edge weight being equal to similarity score of two nodes
@@ -120,7 +112,6 @@ class Graph(object):
 		if node1 != node2:
 		    #print self.similarityScore(node1.kw, node2.kw, g)
 		    node1.add(node2, self.similarityScore(node1.kw, node2.kw, g))
-	print "Done"
 
     """
     Get sorted list of edges (where weight is in dec. order)
@@ -144,16 +135,10 @@ if __name__ == '__main__':
     # Convert bipartite graph to directed graph using similarity function
     # of ads
     g_new = Graph()
-
-    print "Converting to Bipartite"
-
     g_new.bipartiteConversion(g)
 
-    #print "Sorting edges"
-
+    # Get list of sorted edges by weight
     sorted_edge_list = g_new.sortedListOfEdges()
-
-    #print sorted_edge_list
 
     # create list of singleton clusters
     cluster_list = [] 
@@ -163,38 +148,12 @@ if __name__ == '__main__':
 	node_cluster_dict[node] = cluster
 	cluster_list.append(cluster)
 
-    print len(cluster_list)
-
     # run linkage algorithm to finalize clusters
 
     for (node1, node2, w) in sorted_edge_list:
 	
-	#print len(cluster_list)
-
 	firstCluster = node_cluster_dict[node1]
 	secondCluster = node_cluster_dict[node2]
-
-	#print "getting first cluster"
-
-	#print "node1", repr(node1)
-	#print repr(node2)
-	# find cluster with first node
-	"""
-	for c in cluster_list:
-	    if c.hasNode(node1) == True:
-		firstCluster = c
-		break
-
-	#print "getting second cluster"
-	
-	# find cluster with second node
-	for c in cluster_list:
-	    if c.hasNode(node2) == True:
-		secondCluster = c
-		break
-	"""
-
-	#print "running rules"
 
 	# Rules for clusters
 	if firstCluster == secondCluster:
@@ -207,23 +166,16 @@ if __name__ == '__main__':
 	    for node in secondCluster.node_list:
 		node_cluster_dict[node] = firstCluster
 
-	    #print repr(secondCluster)
+	    # remove the cluster we merged in
 	    cluster_list.remove(secondCluster)	
-	    #print "here"
 
 	else:
 	    continue
-
-    #for cluster in cluster_list:
-	#print repr(cluster)
-
-    #print len(cluster_list)
 
     # Compute predictions for keywords in test set 
     list_test_keywords = map(lambda x : Keyword(x.keyword_id), list_of_test_sessions)
     list_CTR_predictions = []
     for kw in list_test_keywords:
-	print kw	
 	corresponding_cluster = node_cluster_dict[g_new.findNode(kw)]
 	list_CTR_predictions.append(corresponding_cluster.computeCTR())
 

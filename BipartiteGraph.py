@@ -85,7 +85,7 @@ class BipartiteGraph(object):
 	return existingKw
 
     """
-    Records that an ad edge exists from advertisder to ed
+    Records that an ad edge exists from advertiser to keyword
     """
     def add(self, advertiser, kw):
 	# The adv is in the matrix

@@ -9,13 +9,13 @@ from TestSession import *
 from Keyword import *
 from Advertiser import *
 from BipartiteGraph import *
-
+from SpectralBipartiteGraph import *
 
 """
 Creates bipartite graph out of training set and test set (read from database)
 Returns the bipartite graph & list of session from test set
 """
-def createGraph():
+def createGraph(spectralGraph = False):
     # setup DB connection 
     engine = create_engine('sqlite:///ctr.db', echo=True)
     metadata = MetaData()
@@ -25,7 +25,10 @@ def createGraph():
     session = Session()
 
     # create empty bipartite graph
-    g = BipartiteGraph()
+    if spectralGraph == False:
+	g = BipartiteGraph()
+    else:
+	g = SpectralBipartiteGraph()
 
     # make query to get all rows from search_sessions table
     for searchSession in session.query(SearchSession).all():

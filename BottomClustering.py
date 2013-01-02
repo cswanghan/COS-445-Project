@@ -138,7 +138,7 @@ class Graph(object):
 	    
 	
 if __name__ == '__main__':
-    # Create biparitite graph from existing Advertisement and Ads 
+    # Create biparitite graph from existing Advertisement and Keywords
     (g, list_of_test_sessions) = createGraph()
 			
     # Convert bipartite graph to directed graph using similarity function

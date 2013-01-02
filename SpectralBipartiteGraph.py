@@ -14,7 +14,7 @@ class SpectralBipartiteGraph(BipartiteGraph):
     Constructor uses parent constructor
     """
     def __init__(self):
-	print "spectral initiating"
+	#print "spectral initiating"
 	super(SpectralBipartiteGraph, self).__init__()
 	self.weightMatrix = None
 	
@@ -29,9 +29,10 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	# Go through each advertiser and ad 
 	# and note '1' if connection exists and '0'
 	# otherwise
-	for advertiser in self.matrix.keys():	
+	#print sorted(self.matrix.keys(), key = lambda adv : adv.advertiser_id)
+	for advertiser in sorted(self.matrix.keys(), key = lambda adv : adv.advertiser_id):	
 	    row = []
-	    for ad in self.dict_of_keywords:
+	    for ad in sorted(self.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
 		if self.matrix[advertiser][ad] == 1:
 		    row.append(1)
 		else:
@@ -40,7 +41,7 @@ class SpectralBipartiteGraph(BipartiteGraph):
 
 	
 	self.weightMatrix = np.array(list_of_rows)
-	print "weight Matrix", self.weightMatrix
+	#print "weight Matrix", self.weightMatrix
 
     """
     Compute scaled weight matrix W^
@@ -60,7 +61,7 @@ class SpectralBipartiteGraph(BipartiteGraph):
 
 	# multiply matrices
 	w_prime = np.dot(np.dot(D_x_powered, self.weightMatrix), D_y_powered)
-	print "weight Matrix Prime", w_prime
+	#print "weight Matrix Prime", w_prime
     
 	return w_prime
 
@@ -71,8 +72,8 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	# assume eigenvalues/eigenvectors orderered in dec order left to right
 	# 2nd-largest left singular vector (derived from U)
 	
-	print "S"
-	print S
+	#print "S"
+	#print S
 	#print "U"
 	#print U
 	x = U[:,1]
@@ -80,6 +81,8 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	#print x
 	
 	# 2nd-largest right singular vector (derived from V)
+	#print "V"
+	#print V
 	y = V[:,1]
 
 	return (x,y)
@@ -115,11 +118,11 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	# Partition advertisements
 	index = 0
 	c_x = 0.0
-	#print "x"
-	#print x
-	#print "x_new"
-	#print x_new
-	for adv in self.matrix.keys():
+	#print "y"
+	#print y
+	#print "y_new"
+	#print y_new
+	for adv in sorted(self.matrix.keys(), key = lambda adv : adv.advertiser_id):
 	    if x_new.item(index) >= c_x:
 		A.append(adv)
 	    else:
@@ -130,7 +133,7 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	# Partition ads
 	index = 0
 	c_y = 0.0
-	for ad in self.dict_of_keywords.keys():
+	for ad in sorted(self.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
 	    if y_new.item(index) >= c_y:
 		B.append(ad)
 	    else:
@@ -144,16 +147,38 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	partition = SpectralBipartiteGraph()
 	partition_c = SpectralBipartiteGraph()
 
+	#print "A", len(A)
+	#print "Ac", len(A_c)
+	#print "B", len(B)
+	#print "Bc", len(B_c)
+
 	for adv in A:
 	    for ad in B:
 		if self.matrix[adv][ad] == 1:
 		    partition.add(adv,ad)
-
 
 	for adv in A_c:
 	    for ad in B_c:
 		if self.matrix[adv][ad] == 1:
 		    partition_c.add(adv, ad)
 
+	partition.setWeightMatrix()
+	partition_c.setWeightMatrix()
 	return (partition, partition_c)
+
+    """
+    Return average CTR of cluster
+    """
+    def computeCTR(self):
+	total = 0.0
+	for kw in self.dict_of_keywords.keys():
+	    # If keyword is in training set, and 
+	    # CTR value is returned then factor that
+	    # into average
+	    avg = kw.averageCTR()
+	    if avg != None:
+		total += avg
+	
+	return total/len(self.dict_of_keywords.keys())
+
 

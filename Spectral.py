@@ -63,14 +63,19 @@ if __name__ == '__main__':
     #cluster1, cluster2 = spectralG.partition()
     list_of_clusters = produceClusters(spectralG)
 
+    # print number of clusters
+    print "Number of clusters", len(list_of_clusters)
+
     # map each test session to its keyword
     list_test_keywords = map(lambda x : Keyword(x.keyword_id), list_of_test_sessions)
 
     # compute predictions for CTR
     list_CTR_predictions = []
     for kw in list_test_keywords:
+	print kw
 	for cluster in list_of_clusters:
 	    if cluster.getKeyword(kw) != None:
+		print "FOUND"
 		list_CTR_predictions.append(cluster.computeCTR())
 		break
     

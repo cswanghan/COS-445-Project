@@ -17,6 +17,54 @@ class SpectralBipartiteGraph(BipartiteGraph):
     	super(SpectralBipartiteGraph, self).__init__()
 	self.weightMatrix = None
 	
+    """
+    Records that an ad edge exists from advertiser to keyword
+    """
+    def add(self, advertiser, kw, position):
+	# The adv is in the matrix
+	if self.getAdv(advertiser) != None:
+	    advertiser = self.getAdv(advertiser)
+	    # If we have not recorded this ad before, we add edge from
+	    # specific adv to ad and no edge from all other advs to this ad
+	    actualKw = self.getKeyword(kw)
+	    if actualKw == None:
+		self.dict_of_keywords[kw] = [advertiser]
+		#self.list_of_keywords.add(kw)
+		for adv in self.matrix.keys():
+		    self.matrix[adv][kw] = 0
+
+		self.matrix[advertiser][kw] = position
+
+	    # Since we have seen this ad before, just record that there
+	    # exists edge from specific adv to ad    
+	    else:
+		self.matrix[advertiser][actualKw] = position
+		self.dict_of_keywords[actualKw].append(advertiser)			
+
+	# The adv is not in the matrix
+	else:
+	    # If we have not recorded this ad before, we add no edge from
+	    # existing advs to this ad and then add the adv to the matrix
+	    actualKw = self.getKeyword(kw)
+	    if actualKw == None:
+		for adv in self.matrix.keys():
+		    self.matrix[adv][kw] = 0
+		
+		#self.list_of_keywords.add(kw)
+		self.dict_of_keywords[kw] = [advertiser]
+
+	    # Add adv to matrix - add no edge from this adv to existing ads
+	    # and record edge from this adv to given ad
+	    self.matrix[advertiser] = {}
+	    for old_kw in self.dict_of_keywords.keys():
+		self.matrix[advertiser][old_kw] = 0
+
+	    if actualKw == None:
+		self.matrix[advertiser][kw] = position
+	    else:
+		self.matrix[advertiser][actualKw] = position
+		self.dict_of_keywords[actualKw].append(advertiser)
+
     
     """
     Returns edge weight matrix (in numpy format) of 
@@ -32,8 +80,8 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	for advertiser in sorted(self.matrix.keys(), key = lambda adv : adv.advertiser_id):	
 	    row = []
 	    for ad in sorted(self.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
-		if self.matrix[advertiser][ad] == 1:
-		    row.append(1)
+		if self.matrix[advertiser][ad] >= 1:
+		    row.append(self.matrix[advertiser][ad] )
 		else:
 		    row.append(0)
 	    list_of_rows.append(row)
@@ -121,15 +169,15 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	partition = SpectralBipartiteGraph()
 	partition_c = SpectralBipartiteGraph()
 
-	for adv in A:
-	    for ad in B:
-		if self.matrix[adv][ad] == 1:
-		    partition.add(adv,ad)
+	for adv in sorted(A, key = lambda adv : adv.advertiser_id):
+	    for ad in sorted(B, key = lambda ad : ad.keyword_id):
+		if self.matrix[adv][ad] >= 1:
+		    partition.add(adv,ad, self.matrix[adv][ad])
 
-	for adv in A_c:
-	    for ad in B_c:
-		if self.matrix[adv][ad] == 1:
-		    partition_c.add(adv, ad)
+	for adv in sorted(A_c, key = lambda adv : adv.advertiser_id):
+	    for ad in sorted(B_c, key = lambda ad : ad.keyword_id):
+		if self.matrix[adv][ad] >= 1:
+		    partition_c.add(adv, ad, self.matrix[adv][ad])
 
 	partition.setWeightMatrix()
 	partition_c.setWeightMatrix()

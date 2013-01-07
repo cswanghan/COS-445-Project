@@ -30,20 +30,38 @@ def createGraph(spectralGraph = False):
     else:
 	g = SpectralBipartiteGraph()
 
-    # make query to get all rows from search_sessions table
-    for searchSession in session.query(SearchSession).all():
-    	keyword = Keyword(searchSession.keyword_id)
-	advertiser = Advertiser(searchSession.advertiser_id)
-	g.add(advertiser, keyword)
+    if spectralGraph == False:
+	# make query to get all rows from search_sessions table
+	for searchSession in session.query(SearchSession).all():
+	    keyword = Keyword(searchSession.keyword_id)
+	    advertiser = Advertiser(searchSession.advertiser_id)
+	    g.add(advertiser, keyword)
     
 
-    # make query to get all rows from test_sessions table (order by primary_id to 
-    # maintain order in test set)
-    list_of_test_sessions = session.query(TestSession).order_by(TestSession.primary_id)
-    for testSession in list_of_test_sessions:
-    	keyword = Keyword(testSession.keyword_id)
-	advertiser = Advertiser(testSession.advertiser_id)
-	g.add(advertiser, keyword)
+	# make query to get all rows from test_sessions table (order by primary_id to 
+	# maintain order in test set)
+	list_of_test_sessions = session.query(TestSession).order_by(TestSession.primary_id)
+	for testSession in list_of_test_sessions:
+	    keyword = Keyword(testSession.keyword_id)
+	    advertiser = Advertiser(testSession.advertiser_id)
+	    g.add(advertiser, keyword)
+
+    else:
+	# make query to get all rows from search_sessions table
+	for searchSession in session.query(SearchSession).all():
+	    keyword = Keyword(searchSession.keyword_id)
+	    advertiser = Advertiser(searchSession.advertiser_id)
+	    g.add(advertiser, keyword, int(searchSession.position))
+    
+
+	# make query to get all rows from test_sessions table (order by primary_id to 
+	# maintain order in test set)
+	list_of_test_sessions = session.query(TestSession).order_by(TestSession.primary_id)
+	for testSession in list_of_test_sessions:
+	    keyword = Keyword(testSession.keyword_id)
+	    advertiser = Advertiser(testSession.advertiser_id)
+	    g.add(advertiser, keyword, int(searchSession.position))
+
 	
     #print repr(g)
     return (g, list_of_test_sessions)

@@ -35,11 +35,9 @@ def produceClusters(spectralGraph):
     print "cluster1_len", len(cluster1.matrix.keys())
     print "cluster2_len", len(cluster2.matrix.keys())
 
-
-   
     # recursively produce more clusters from these two if 
     # their size is big enough
-    if (len(cluster1.matrix.keys()) < 2 or len(cluster2.matrix.keys()) < 2):
+    if (len(cluster1.matrix.keys()) < 2 or len(cluster2.matrix.keys()) < 2 or len(cluster1.dict_of_keywords.keys()) < 2 or len(cluster2.dict_of_keywords.keys()) < 2):
 	return spectralGraph
     else:
     	l = []

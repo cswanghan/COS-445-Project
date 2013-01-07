@@ -81,7 +81,9 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	    row = []
 	    for ad in sorted(self.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
 		if self.matrix[advertiser][ad] >= 1:
-		    row.append(self.matrix[advertiser][ad] )
+		    if ad.keyword_id == '394' and advertiser.advertiser_id == '27961':
+			print "w matrix:", self.matrix[advertiser][ad] 
+		    row.append(self.matrix[advertiser][ad])
 		else:
 		    row.append(0)
 	    list_of_rows.append(row)
@@ -123,6 +125,9 @@ class SpectralBipartiteGraph(BipartiteGraph):
     Returns two partitions using the spectral method 
     """
     def partition(self):
+	print len(self.matrix.keys())
+	print self.weightMatrix
+
 	# get singular vectors
 	x,y = self.getLeftRightSingularVectors()
 
@@ -134,33 +139,47 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	D_y = getDiagonalMatrix(np.transpose(self.weightMatrix))
 	D_y_powered = powDiagonalMatrix(D_y, -0.5)	
 
+    	#print "weight_matrix", self.weightMatrix
+	#print "D_x", D_x
+
 	x_new = np.dot(D_x_powered, x)
 	y_new = np.dot(D_y_powered, y)
+
+	print "x'", x_new
+	print "y'", y_new
 
 	A = []
 	A_c = []
 	B = []
 	B_c = []
 
-	# Partition advertisements
-	index = 0
 	c_x = 0.0
+    	# Partition advertisements
+	index = 0
+    	print "c_x", c_x
 	for adv in sorted(self.matrix.keys(), key = lambda adv : adv.advertiser_id):
 	    if x_new.item(index) >= c_x:
 		A.append(adv)
 	    else:
 		A_c.append(adv)
 
+		if adv.advertiser_id == '27961':
+		    print "c_x specific", x_new.item(index)
+
 	    index += 1
 
+	c_y = 0.0
 	# Partition ads
 	index = 0
-	c_y = 0.0
+	print "c_y", c_y
 	for ad in sorted(self.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
 	    if y_new.item(index) >= c_y:
 		B.append(ad)
 	    else:
 		B_c.append(ad)
+
+	    if ad.keyword_id == '394':
+		print "c_y_specific", y_new.item(index)
 
 	    index += 1
 
@@ -178,6 +197,16 @@ class SpectralBipartiteGraph(BipartiteGraph):
 	    for ad in sorted(B_c, key = lambda ad : ad.keyword_id):
 		if self.matrix[adv][ad] >= 1:
 		    partition_c.add(adv, ad, self.matrix[adv][ad])
+
+	# Do check for partitions
+	for kw in sorted(self.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+	    if partition.getKeyword(kw) == None and partition_c.getKeyword(kw) == None:
+		for ad in self.dict_of_keywords[kw]:
+		    if partition.getAdv(ad) != None:
+			partition.add(ad, kw, self.matrix[ad][kw])
+		    else:
+			partition_c.add(ad, kw, self.matrix[ad][kw])
+
 
 	partition.setWeightMatrix()
 	partition_c.setWeightMatrix()
@@ -197,5 +226,58 @@ class SpectralBipartiteGraph(BipartiteGraph):
 		total += avg
 	
 	return total/len(self.dict_of_keywords.keys())
+
+"""
+def score(cluster1, cluster2):
+	total_score = 0
+	num = 0
+	denom = 0
+	for advertiser in sorted(cluster1.matrix.keys(), key = lambda adv : adv.advertiser_id):	
+    	    for ad in sorted(cluster1.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		num += cluster1.matrix[advertiser][ad]
+
+	print "num", num
+
+	for advertiser in sorted(cluster1.matrix.keys(), key = lambda adv : adv.advertiser_id):	
+    	    for ad in sorted(cluster1.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+    		denom += cluster1.matrix[advertiser][ad]
+	    for ad in sorted(cluster2.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		denom += cluster1.matrix[advertiser][ad]
+
+	for advertiser in sorted(cluster1.matrix.keys(), key = lambda adv : adv.advertiser_id):	
+    	    for ad in sorted(cluster1.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		denom += cluster1.matrix[advertiser][ad]
+	for advertiser in sorted(cluster2.matrix.keys(), key = lambda adv : adv.advertiser_id):	
+    	    for ad in sorted(cluster1.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		denom += cluster2.matrix[advertiser][ad]
+
+	print num
+	total_score += float(num)/float(denom)
+	num = 0
+	denom = 0
+
+	for advertiser in sorted(cluster2.matrix.keys(), key = lambda adv : adv.advertiser_id):	
+    	    for ad in sorted(cluster2.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		num += cluster2.matrix[advertiser][ad]
+
+	for advertiser in sorted(cluster2.matrix.keys(), key = lambda adv : adv.advertiser_id):	
+    	    for ad in sorted(cluster1.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		denom += cluster2.matrix[advertiser][ad]
+	    for ad in sorted(cluster2.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		denom += cluster2.matrix[advertiser][ad]
+
+	for advertiser in sorted(cluster1.matrix.keys(), key = lambda adv : adv.advertiser_id):	
+    	    for ad in sorted(cluster2.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		denom += cluster1.matrix[advertiser][ad]
+	for advertiser in sorted(cluster2.matrix.keys(), key = lambda adv : adv.advertiser_id):	
+    	    for ad in sorted(cluster2.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
+		denom += cluster2.matrix[advertiser][ad]
+
+	
+	total_score += float(num)/float(denom)	
+	print score, "total_score"	
+	return 1.0/total_score
+"""
+
 
 

@@ -46,9 +46,12 @@ class Keyword(object):
 	    total += float(search_session.clicks)/float(search_session.impressions)
 	    count += 1
 
+	# End session; otherwise, gives error with constant querying
+	session.commit()
+
 	if count == 0:
 	    return None
-	else:
+    	else:
 	    return total/count
 
 

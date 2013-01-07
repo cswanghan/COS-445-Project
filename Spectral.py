@@ -31,6 +31,11 @@ class Cluster(SpectralBipartiteGraph):
 def produceClusters(spectralGraph):
     # produce two clusters
     cluster1, cluster2 = spectralGraph.partition()
+
+    print "cluster1_len", len(cluster1.matrix.keys())
+    print "cluster2_len", len(cluster2.matrix.keys())
+
+
    
     # recursively produce more clusters from these two if 
     # their size is big enough
@@ -64,22 +69,24 @@ if __name__ == '__main__':
     list_of_clusters = produceClusters(spectralG)
 
     # print number of clusters
-    print "Number of clusters", len(list_of_clusters)
+    print "Number of clusters:", len(list_of_clusters)
 
     # map each test session to its keyword
     list_test_keywords = map(lambda x : Keyword(x.keyword_id), list_of_test_sessions)
 
     # compute predictions for CTR
     list_CTR_predictions = []
+    count = 0
     for kw in list_test_keywords:
 	print kw
 	for cluster in list_of_clusters:
 	    if cluster.getKeyword(kw) != None:
 		print "FOUND"
 		list_CTR_predictions.append(cluster.computeCTR())
+		count += 1
 		break
     
-    
+    print "found_ratio", count/float(len(list_test_keywords))
     # Compute Mean Squared Error for predictions
     m_s_e = evaluator(list_CTR_predictions)
     print m_s_e

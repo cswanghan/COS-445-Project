@@ -59,6 +59,8 @@ def createGraph(spectralGraph = False):
 	list_of_test_sessions = session.query(TestSession).order_by(TestSession.primary_id)
 	for testSession in list_of_test_sessions:
 	    keyword = Keyword(testSession.keyword_id)
+	    if testSession.keyword_id == '394':
+		print "Found advertiser:", testSession.advertiser_id
 	    advertiser = Advertiser(testSession.advertiser_id)
 	    g.add(advertiser, keyword, int(searchSession.position))
 

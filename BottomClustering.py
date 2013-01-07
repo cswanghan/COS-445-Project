@@ -64,6 +64,23 @@ class Cluster:
 	
 	return total/len(self.node_list)
 
+    """
+    Return weighted CTR of cluster
+    """
+    def weightedCTR(self, query_node, g, g_new):
+	total_weight = 0.0
+	for node in self.node_list:
+	    if node != query_node:
+		total_weight += g_new.similarityScore(query_node.kw, node.kw, g)
+
+	total = 0.0
+	for node in self.node_list:
+	    weight = g_new.similarityScore(query_node.kw, node.kw, g)
+	    avg = node.kw.averageCTR()
+	    if avg != None:
+		total = (weight/total_weight) * avg
+
+	return total
     
 class Graph(object):
     def __init__(self):
@@ -172,14 +189,26 @@ if __name__ == '__main__':
 	else:
 	    continue
 
+    # Print out number of clusters:
+    print "Number of Clusters:", len(cluster_list)
+
     # Compute predictions for keywords in test set 
     list_test_keywords = map(lambda x : Keyword(x.keyword_id), list_of_test_sessions)
     list_CTR_predictions = []
+    list_CTR_weighted_predictions = []
     for kw in list_test_keywords:
-	corresponding_cluster = node_cluster_dict[g_new.findNode(kw)]
+	node = g_new.findNode(kw)
+	corresponding_cluster = node_cluster_dict[node]
 	list_CTR_predictions.append(corresponding_cluster.computeCTR())
+	list_CTR_weighted_predictions.append(corresponding_cluster.weightedCTR(node, g, g_new))
+
 
     # Compute Mean Squared Error for predictions
     m_s_e = evaluator(list_CTR_predictions)
     print m_s_e
+	
+    # Compute Mean Squared Error for predictions
+    m_s_e = evaluator(list_CTR_weighted_predictions)
+    print m_s_e
+
 	

@@ -1,6 +1,7 @@
 from BipartiteGraph import *
 from createGraph import createGraph
 from MeanSquaredError import evaluator
+from random import randint
 
 class Node:
     def __init__(self, kw):
@@ -21,7 +22,10 @@ class Node:
 
 class Cluster:
     def __init__(self, node):
-	self.node_list = [node]
+	if node != None:
+	    self.node_list = [node]
+	else:
+	    self.node_list = []
 
     def isSingleton(self):
 	return (len(self.node_list) == 1)
@@ -48,6 +52,33 @@ class Cluster:
 
     def __eq__(self, other):
 	return (self.node_list == other.node_list)
+
+    """
+    Return normalized cut value if node was in other cluster
+    """
+    def cut(self, node, g, g_new):
+	num = 0.0
+	denom = 0.0
+
+	for cluster_node in self.node_list:
+	    if node.kw != cluster_node.kw:
+		num += g_new.similarityScore(cluster_node.kw, node.kw, g)
+
+	for graph_node in g_new.node_list:
+	    if node.kw != graph_node.kw: 
+		denom += g_new.similarityScore(graph_node.kw, node.kw, g)
+
+	cut = num/denom	
+	return cut
+	
+
+    """
+    Get random node
+    """
+    def getRandomNode(self):
+	index = randint(0, len(self.node_list) - 1)
+	return self.node_list[index]
+
 
     """
     Return average CTR of cluster
@@ -143,6 +174,13 @@ class Graph(object):
 
 	# Sort list using edge weight as key and return in reverse of asc. order
 	return sorted(edge_list, key = lambda edge : edge[2], reverse=True)
+
+    """
+    Get random node
+    """
+    def getRandomNode(self):
+	index = randint(0, len(self.node_list) - 1)
+	return self.node_list[index]
 	    
 	
 if __name__ == '__main__':

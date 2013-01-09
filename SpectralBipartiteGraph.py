@@ -198,7 +198,7 @@ class SpectralBipartiteGraph(BipartiteGraph):
 		if self.matrix[adv][ad] >= 1:
 		    partition_c.add(adv, ad, self.matrix[adv][ad])
 
-	# Do check for partitions
+	# Do check for partitions to ensure no keyword is left out
 	for kw in sorted(self.dict_of_keywords.keys(), key = lambda ad : ad.keyword_id):
 	    if partition.getKeyword(kw) == None and partition_c.getKeyword(kw) == None:
 		for ad in self.dict_of_keywords[kw]:
